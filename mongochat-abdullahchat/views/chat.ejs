@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 col-sm-12">
+            <h1 class="text-center">
+                AbdullahChat 
+             
+            </h1>
+            <div id="status"></div>
+            <div id="chat">
+                
+                <br>
+                <div class="card">
+                    <div id="messages" class="card-block">
+                        <ul>
+                            <% res.forEach(function(x) { %>
+                                <li><%if (x.user.available ==true) {%><span class="dot-live"></span>  <% } else{ %> <span class="dot-nlive"></span> <% } %> <%= x.name %> - <%= x.message %>    </li>
+                            <% }); %>
+                        </ul>
+
+                    </div>
+                </div>
+                <br>
+                
+            </div>
+        </div>
+    </div>
+   
+    
+</div>
+
+<style>
+    ul {
+    list-style: none!important;
+    }
+.dot-live {
+  height:5px;
+  width: 5px;
+  background-color:green;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-nlive
+{
+  height: 5px;
+  width: 5px;
+  background-color:red;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+</style>

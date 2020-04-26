@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>MongoChat</title>
+    <style>
+        #messages{height:300px;}
+    </style>
+</head>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">AbyChat</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+        <li class="nav-item ">
+          <a class="nav-link" href="#" id="home">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="chat">Chat</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="about">About</a>
+        </li>
+        <li>
+            <a class="nav-link" href="./register.html" id="about">Logout</a>
+        </li>
+        <!--
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#">Disabled</a>
+        </li>-->
+      </ul>
+      <div class="d-flex flex-row-reverse">
+        <p id="loggedUser"></p>
+      </div>
+
+
+     
+    </div>
+  </nav>
+
+
+<body>
+    <div class="container">
+        <div class="row" style="display: none;">
+            <div class="col-md-6 offset-md-3 col-sm-12">
+                <h1 class="text-center">
+                    AbdullahChat 
+                 
+                </h1>
+                <div id="status"></div>
+                <div id="chat">
+                    
+                    <br>
+                    <div class="card">
+                        <div id="messages" class="card-block">
+
+                        </div>
+                    </div>
+                    <br>
+                   
+                </div>
+            </div>
+        </div>
+        <div id="ekran"></div>
+        <div  class="col-md-6 offset-md-3 col-sm-12" id="control">
+          <!--  <input type="text" id="username" class="form-control" placeholder="Enter name...">-->
+            <textarea  id="textarea" class="form-control" placeholder="Enter message..." ></textarea>
+            <button id="clear" class="btn btn-danger">Clear</button>
+        </div>
+        
+        
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    <script>
+        var activepage="start";
+        var username="";
+        if(sessionStorage.getItem("username")==null)
+        {
+            sessionStorage.setItem("message","true");
+            window.location.href = './register.html';
+        }
+        else{
+            username=sessionStorage.getItem("username");
+            $('#loggedUser').text(username);
+        }
+
+        function fillScreen(data)
+        {            
+            $('#ekran').empty();
+            $('#ekran').append(data);
+        }
+
+
+        (function(){
+            var element = function(id){
+                return document.getElementById(id);
+            }
+            
+
+            // Get Elements
+            var status = element('status');
+            var messages = element('messages');
+            var textarea = element('textarea');
+            var control  = element('control');
+           // var username = element('username');
+            var clearBtn = element('clear');
+            var ekran = element('ekran');
+            var about= element('about');
+            var home= element('home');
+            var chat=element('chat');
+
+            // Set default status
+            var statusDefault = status.textContent;
+
+            var setStatus = function(s){
+                // Set status
+                status.textContent = s;
+
+                if(s !== statusDefault){
+                    var delay = setTimeout(function(){
+                        setStatus(statusDefault);
+                    }, 4000);
+                }
+            }
+
+            var setAvailability=function()
+            {   
+                socket.emit('availableUpdate', {
+                            name: sessionStorage.getItem("username"),
+                            available:true
+                        });
+
+            }
+
+            // Connect to socket.io
+            var socket = io.connect('http://127.0.0.1:4000');
+
+            // Check for connection
+            if(socket !== undefined){
+                console.log('Connected to socket...');
+
+                // Handle Output
+                /*socket.on('output', function(data){
+                    console.log(data);
+                    if(data.length){
+                        for(var x = 0;x < data.length;x++){
+                            // Build out message div
+                            var message = document.createElement('div');
+                            message.setAttribute('class', 'chat-message');
+                            message.textContent = data[x].name+": "+data[x].message;
+                            messages.appendChild(message);
+                            messages.insertBefore(message, messages.firstChild);
+                        }
+                    }
+                });*/
+                //console.log("sesija je : " +sessionStorage.getItem("username"));
+                window.setInterval(function(){socket.emit('availableUpdate',{name:username});}, 5000);
+
+                // Get Status From Server
+                socket.on('status', function(data){
+                    // get message status
+                    console.log(data);
+                    setStatus((typeof data === 'object')? data.message : data);
+
+                    // If status is clear, clear text
+                    /*if(data.clear&& data.name==username){
+                        textarea.value = '';
+                    }*/
+                });
+
+                socket.on('page', function(data){
+                   
+                    fillScreen(data);
+                
+                });
+
+                socket.on('uAlive', function(){
+                    socket.emit('availableUpdate',{name:username});
+                });
+
+                // Handle Input
+                textarea.addEventListener('keydown', function(event){
+                    if(event.which === 13 && event.shiftKey == false){
+                        // Emit to server input
+                        socket.emit('input', {
+                            name:username,
+                            message:textarea.value
+                        });
+                        textarea.value = '';
+                        event.preventDefault();
+                    }
+                })
+
+                // Handle Chat Clear
+                clearBtn.addEventListener('click', function(){
+                    socket.emit('clear');
+                });
+
+                about.addEventListener('click',function(){
+                    socket.emit('switch',{page:'about'});
+                    control.style.display="none";
+                    activepage="about";
+
+                });
+
+                home.addEventListener('click',function(){
+                    socket.emit('switch',{page:'home'});
+                    control.style.display="none";
+                    activepage="home";
+
+                });
+                chat.addEventListener('click',function(){
+                    socket.emit('switch',{page:'chat'});
+                    control.style.display="block";
+                    activepage="chat";
+
+                });           
+
+                socket.on('updatechat', function(){
+                    console.log("update");
+                    if(activepage=="chat"){
+                        socket.emit('switch',{page:'chat'});
+                        
+                    }
+                });
+
+                // Clear Message
+                socket.on('cleared', function(){
+                    messages.textContent = '';
+                });
+
+                if(activepage=="start")
+                {
+                    socket.emit('switch',{page:'home'});
+                    control.style.display="none";
+                    activepage="home";
+                }
+
+                
+            }
+
+        })();
+      
+    </script>
+</body>
+</html>
